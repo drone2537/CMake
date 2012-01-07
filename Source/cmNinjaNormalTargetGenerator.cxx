@@ -182,8 +182,10 @@ cmNinjaNormalTargetGenerator
     comment << "Rule for linking " << this->TargetLinkLanguage << " "
             << this->GetVisibleTypeName() << ".";
     std::ostringstream description;
+    this->BeginColorForRule(description, linkCmd);
     description << "Linking " << this->TargetLinkLanguage << " "
                 << this->GetVisibleTypeName() << " $out";
+    this->EndColorForRule(description, linkCmd);
     this->GetGlobalGenerator()->AddRule(ruleName,
                                         linkCmd,
                                         description.str(),
@@ -191,22 +193,30 @@ cmNinjaNormalTargetGenerator
   }
 
   if (this->TargetNameOut != this->TargetNameReal) {
+    std::ostringstream linkDescription;
     std::string cmakeCommand =
       this->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
-    if (this->GetTarget()->GetType() == cmTarget::EXECUTABLE)
+    if (this->GetTarget()->GetType() == cmTarget::EXECUTABLE) {
+      this->BeginColorForRule(linkDescription, "CMAKE_SYMLINK_EXECUTABLE");
+      linkDescription << "Creating executable symlink $out";
+      this->EndColorForRule(linkDescription, "CMAKE_SYMLINK_EXECUTABLE");
       this->GetGlobalGenerator()->AddRule("CMAKE_SYMLINK_EXECUTABLE",
                                           cmakeCommand +
                                           " -E cmake_symlink_executable"
                                           " $in $out && $POST_BUILD",
-                                          "Creating executable symlink $out",
+                                          linkDescription.str(),
                                       "Rule for creating executable symlink.");
-    else
+    } else {
+      this->BeginColorForRule(linkDescription, "CMAKE_SYMLINK_LIBRARY");
+      linkDescription << "Creating library symlink $out";
+      this->EndColorForRule(linkDescription, "CMAKE_SYMLINK_LIBRARY");
       this->GetGlobalGenerator()->AddRule("CMAKE_SYMLINK_LIBRARY",
                                           cmakeCommand +
                                           " -E cmake_symlink_library"
                                           " $in $SONAME $out && $POST_BUILD",
-                                          "Creating library symlink $out",
+                                          linkDescription.str(),
                                          "Rule for creating library symlink.");
+    }
   }
 }
 

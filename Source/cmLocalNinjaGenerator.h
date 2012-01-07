@@ -70,6 +70,9 @@ public:
   std::string GetHomeRelativeOutputPath() const
   { return this->HomeRelativeOutputPath; }
 
+  bool GetColorsForRules() const
+  { return this->ColorsForRules; }
+
 protected:
   virtual std::string ConvertToLinkReference(std::string const& lib);
   virtual std::string ConvertToIncludeReference(std::string const& path);
@@ -125,6 +128,7 @@ private:
 private:
   std::string ConfigName;
   std::string HomeRelativeOutputPath;
+  bool ColorsForRules;
 
   typedef std::map<cmCustomCommand*, std::set<cmTarget*> >
     CustomCommandTargetMap;

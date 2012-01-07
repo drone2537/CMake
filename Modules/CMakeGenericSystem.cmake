@@ -59,6 +59,14 @@ IF(CMAKE_GENERATOR MATCHES "Makefiles")
 ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
 
 
+IF(CMAKE_GENERATOR MATCHES "Ninja")
+  SET(CMAKE_COLOR_NINJA ON CACHE BOOL
+    "Enable/Disable color output during build."
+    )
+  MARK_AS_ADVANCED(CMAKE_COLOR_NINJA)
+ENDIF(CMAKE_GENERATOR MATCHES "Ninja")
+
+
 # GetDefaultWindowsPrefixBase
 #
 # Compute the base directory for CMAKE_INSTALL_PREFIX based on:

@@ -28,6 +28,7 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator()
   , HomeRelativeOutputPath("")
 {
   this->IsMakefileGenerator = true;
+  this->ColorsForRules = false;
 }
 
 //----------------------------------------------------------------------------
@@ -43,6 +44,8 @@ void cmLocalNinjaGenerator::Generate()
 
   this->WriteProcessedMakefile(this->GetBuildFileStream());
   this->WriteProcessedMakefile(this->GetRulesFileStream());
+
+    this->ColorsForRules = this->GetMakefile()->IsOn("CMAKE_COLOR_NINJA");
 
   this->WriteBuildFileTop();
 

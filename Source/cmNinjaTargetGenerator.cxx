@@ -23,6 +23,11 @@
 #include "cmCustomCommandGenerator.h"
 
 #include <algorithm>
+#include <map>
+#include <string>
+
+static std::map<std::string,int> RuleColors;
+static int NextRuleColor = 1;
 
 cmNinjaTargetGenerator *
 cmNinjaTargetGenerator::New(cmTarget* target)
@@ -279,6 +284,40 @@ std::string cmNinjaTargetGenerator::GetTargetName() const
 
 void
 cmNinjaTargetGenerator
+::BeginColorForRule(std::ostringstream& description, const std::string& rule, cmake* globalInstance)
+{
+  bool useColors = cmSystemTools::IsOn(globalInstance->GetCacheManager()->GetCacheValue("CMAKE_COLOR_NINJA"));
+  int color;
+  if ( useColors )
+    {
+    std::map<std::string,int>::iterator colorIt;
+    colorIt = RuleColors.find( rule.c_str() );
+    if ( colorIt == RuleColors.end() )
+      {
+      RuleColors[rule.c_str()] = NextRuleColor ++;
+      if ( NextRuleColor >= 7 )
+        {
+        NextRuleColor = 1;
+        }
+      colorIt = RuleColors.find( rule.c_str() );
+      }
+    description << "\x1B[" << ( 30 + colorIt->second ) << ";1m";
+    }
+}
+
+void
+cmNinjaTargetGenerator
+::EndColorForRule(std::ostringstream& description, const std::string&, cmake* globalInstance)
+{
+  bool useColors = cmSystemTools::IsOn(globalInstance->GetCacheManager()->GetCacheValue("CMAKE_COLOR_NINJA"));
+  if ( useColors )
+    {
+    description << "\x1B[0m";
+    }
+}
+
+void
+cmNinjaTargetGenerator
 ::WriteLanguageRules(const std::string& language)
 {
   this->GetRulesFileStream()
@@ -327,7 +366,9 @@ cmNinjaTargetGenerator
   std::ostringstream comment;
   comment << "Rule for compiling " << language << " files.";
   std::ostringstream description;
+  this->BeginColorForRule(description, compileCmdVar);
   description << "Building " << language << " object $out";
+  this->EndColorForRule(description, compileCmdVar);
   this->GetGlobalGenerator()->AddRule(this->LanguageCompilerRule(language),
                                       compileCmd,
                                       description.str(),
@@ -442,4 +483,38 @@ cmNinjaTargetGenerator
                                      emptyDeps,
                                      orderOnlyDeps,
                                      vars);
+}
+
+void
+cmNinjaTargetGenerator
+::BeginColorForRule(std::ostringstream& description, const std::string& rule)
+{
+  bool useColors = this->GetLocalGenerator()->GetColorsForRules();
+  int color;
+  if ( useColors )
+    {
+    std::map<std::string,int>::iterator colorIt;
+    colorIt = RuleColors.find( rule.c_str() );
+    if ( colorIt == RuleColors.end() )
+      {
+      RuleColors[rule.c_str()] = NextRuleColor ++;
+      if ( NextRuleColor >= 7 )
+        {
+        NextRuleColor = 1;
+        }
+      colorIt = RuleColors.find( rule.c_str() );
+      }
+    description << "\x1B[" << ( 30 + colorIt->second ) << ";1m";
+    }
+}
+
+void
+cmNinjaTargetGenerator
+::EndColorForRule(std::ostringstream& description, const std::string&)
+{
+  bool useColors = this->GetLocalGenerator()->GetColorsForRules();
+  if ( useColors )
+    {
+    description << "\x1B[0m";
+    }
 }

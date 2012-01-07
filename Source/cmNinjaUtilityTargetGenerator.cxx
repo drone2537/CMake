@@ -63,6 +63,10 @@ void cmNinjaUtilityTargetGenerator::Generate()
       desc = echoStr;
     else
       desc = "Running utility command for " + this->GetTargetName();
+    std::ostringstream description;
+    this->BeginColorForRule(description, command);
+    description << desc;
+    this->EndColorForRule(description, command);
 
     // TODO: fix problematic global targets.  For now, search and replace the
     // makefile vars.
@@ -80,7 +84,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
 
     this->GetGlobalGenerator()->WriteCustomCommandBuild(
       command,
-      desc,
+      description.str(),
       "Utility command for " + this->GetTargetName(),
       cmNinjaDeps(1, utilCommandName),
       deps);

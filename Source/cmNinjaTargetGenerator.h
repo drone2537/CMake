@@ -40,6 +40,9 @@ public:
 
   std::string GetTargetName() const;
 
+  static void BeginColorForRule(std::ostringstream& sstr, const std::string& rule, cmake* globalInstance);
+  static void EndColorForRule(std::ostringstream& sstr, const std::string& rule, cmake* globalInstance);
+
 protected:
   cmGeneratedFileStream& GetBuildFileStream() const;
   cmGeneratedFileStream& GetRulesFileStream() const;
@@ -103,6 +106,9 @@ protected:
 
   cmNinjaDeps GetObjects() const
   { return this->Objects; }
+
+  void BeginColorForRule(std::ostringstream& sstr, const std::string& rule);
+  void EndColorForRule(std::ostringstream& sstr, const std::string& rule);
 
 private:
   cmTarget* Target;
