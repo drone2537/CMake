@@ -12,6 +12,7 @@
 ============================================================================*/
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
+#include "cmNinjaTargetGenerator.h"
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmVersion.h"
@@ -181,9 +182,13 @@ void cmGlobalNinjaGenerator::WritePhonyBuild(std::ostream& os,
 
 void cmGlobalNinjaGenerator::AddCustomCommandRule()
 {
+  std::ostringstream description;
+  cmNinjaTargetGenerator::BeginColorForRule(description, "CUSTOM_COMMAND", this->GetCMakeInstance());
+  description << "$DESC";
+  cmNinjaTargetGenerator::EndColorForRule(description, "CUSTOM_COMMAND", this->GetCMakeInstance());
   this->AddRule("CUSTOM_COMMAND",
                 "$COMMAND",
-                "$DESC",
+                description.str(),
                 "Rule for running custom commands.",
                 /*depfile*/ "",
                 /*restat*/ true);
@@ -733,10 +738,14 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmd << mfRoot->GetRequiredDefinition("CMAKE_COMMAND")
       << " -H" << mfRoot->GetHomeDirectory()
       << " -B" << mfRoot->GetHomeOutputDirectory();
+  std::ostringstream description;
+  cmNinjaTargetGenerator::BeginColorForRule(description, "RERUN_CMAKE", this->GetCMakeInstance());
+  description << "Re-running CMake...";
+  cmNinjaTargetGenerator::EndColorForRule(description, "RERUN_CMAKE", this->GetCMakeInstance());
   WriteRule(*this->RulesFileStream,
             "RERUN_CMAKE",
             cmd.str(),
-            "Re-running CMake...",
+            description.str(),
             "Rule for re-running cmake.",
             /*depfile=*/ "",
             /*restat=*/ false,
